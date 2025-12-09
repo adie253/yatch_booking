@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Anchor, LogOut, Check, X, Clock, Calendar, DollarSign, User, Phone, Mail, MapPin } from 'lucide-react';
+import { Anchor, LogOut, Check, X, Clock, MapPin, User, Phone, Mail, ArrowLeft, Calendar } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const AdminDashboard = () => {
+const AdminTrips = () => {
     const navigate = useNavigate();
     const [bookings, setBookings] = useState([]);
     const [activeTab, setActiveTab] = useState('pending');
@@ -15,8 +15,7 @@ const AdminDashboard = () => {
             return;
         }
 
-        const storedBookings = JSON.parse(localStorage.getItem('boat_bookings') || '[]');
-        // Sort by newest first
+        const storedBookings = JSON.parse(localStorage.getItem('trip_bookings') || '[]');
         const sortedBookings = storedBookings.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         setBookings(sortedBookings);
     }, [navigate]);
@@ -31,7 +30,7 @@ const AdminDashboard = () => {
             booking.id === id ? { ...booking, status: newStatus } : booking
         );
         setBookings(updatedBookings);
-        localStorage.setItem('boat_bookings', JSON.stringify(updatedBookings));
+        localStorage.setItem('trip_bookings', JSON.stringify(updatedBookings));
     };
 
     const filteredBookings = activeTab === 'pending'
@@ -43,21 +42,21 @@ const AdminDashboard = () => {
             {/* Top Bar */}
             <header className="bg-navy-900 text-white p-4 shadow-lg sticky top-0 z-40">
                 <div className="max-w-7xl mx-auto flex justify-between items-center">
-                    <div className="flex items-center gap-2 font-serif text-xl font-bold tracking-wider text-gold-400">
-                        <Anchor className="w-6 h-6" />
-                        <span>ADMIN DASHBOARD</span>
-                    </div>
-                    <div className="flex items-center gap-6">
-                        <Link to="/admin/trips" className="text-sm uppercase tracking-widest text-white hover:text-gold-400 transition-colors flex items-center gap-2">
-                            <MapPin size={16} /> View Trip Bookings
+                    <div className="flex items-center gap-4">
+                        <Link to="/admin/dashboard" className="text-gray-400 hover:text-white transition-colors">
+                            <ArrowLeft size={24} />
                         </Link>
-                        <button
-                            onClick={handleLogout}
-                            className="flex items-center gap-2 text-sm uppercase tracking-widest hover:text-gold-400 transition-colors"
-                        >
-                            <LogOut size={16} /> Logout
-                        </button>
+                        <div className="flex items-center gap-2 font-serif text-xl font-bold tracking-wider text-gold-400">
+                            <MapPin className="w-6 h-6" />
+                            <span>TRIP BOOKINGS</span>
+                        </div>
                     </div>
+                    <button
+                        onClick={handleLogout}
+                        className="flex items-center gap-2 text-sm uppercase tracking-widest hover:text-gold-400 transition-colors"
+                    >
+                        <LogOut size={16} /> Logout
+                    </button>
                 </div>
             </header>
 
@@ -65,7 +64,7 @@ const AdminDashboard = () => {
                 {/* Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                        <h3 className="text-gray-500 text-xs uppercase tracking-widest font-bold mb-2">Total Requets</h3>
+                        <h3 className="text-gray-500 text-xs uppercase tracking-widest font-bold mb-2">Total Trips</h3>
                         <p className="text-3xl font-serif text-navy-900">{bookings.length}</p>
                     </div>
                     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
@@ -104,7 +103,7 @@ const AdminDashboard = () => {
                 <div className="space-y-4">
                     {filteredBookings.length === 0 ? (
                         <div className="text-center py-20 bg-white rounded-xl border border-dashed border-gray-300">
-                            <p className="text-gray-400">No bookings found in this section.</p>
+                            <p className="text-gray-400">No trip bookings found in this section.</p>
                         </div>
                     ) : (
                         filteredBookings.map((booking) => (
@@ -117,22 +116,14 @@ const AdminDashboard = () => {
                             >
                                 <div className="p-6">
                                     <div className="flex flex-col lg:flex-row gap-8">
-                                        {/* Yacht Info */}
-                                        <div className="lg:w-1/4 flex gap-4 min-w-[200px]">
-                                            <img
-                                                src={booking.yachtDetails.image}
-                                                alt={booking.yachtDetails.name}
-                                                className="w-24 h-24 object-cover rounded-lg"
-                                            />
-                                            <div>
-                                                <h4 className="font-serif text-xl text-navy-900 leading-none mb-1">{booking.yachtDetails.name}</h4>
-                                                <span className="text-xs uppercase tracking-wide text-gold-500 font-bold">{booking.yachtDetails.category}</span>
-                                                <div className="flex items-center gap-1 text-gray-400 text-xs mt-2">
-                                                    <Clock size={12} /> {booking.bookingDetails.duration} Hours
-                                                </div>
-                                                <div className="flex items-center gap-1 text-gray-400 text-xs mt-1">
-                                                    <Calendar size={12} /> {booking.bookingDetails.date}
-                                                </div>
+                                        {/* Trip Info */}
+                                        <div className="lg:w-1/4 min-w-[200px]">
+                                            <h4 className="font-serif text-xl text-navy-900 leading-none mb-2">{booking.itemDetails.name}</h4>
+                                            <div className="flex items-center gap-1 text-gray-400 text-xs mt-2">
+                                                <Clock size={12} /> {booking.bookingDetails.duration} • <User size={12} /> {booking.bookingDetails.guests || '-'} Guests
+                                            </div>
+                                            <div className="flex items-center gap-1 text-gray-400 text-xs mt-1">
+                                                <Calendar size={12} /> {booking.bookingDetails.date}
                                             </div>
                                         </div>
 
@@ -158,8 +149,8 @@ const AdminDashboard = () => {
                                         {/* Status & Actions */}
                                         <div className="lg:w-1/3 flex flex-col justify-between items-end border-t lg:border-t-0 lg:border-l border-gray-100 pt-4 lg:pt-0 lg:pl-8">
                                             <div className="text-right mb-4">
-                                                <h5 className="text-xs uppercase tracking-widest font-bold text-gray-400 mb-1">Est. Price</h5>
-                                                <p className="text-xl font-serif text-navy-900">{booking.bookingDetails.price}</p>
+                                                {/* <h5 className="text-xs uppercase tracking-widest font-bold text-gray-400 mb-1">Est. Price</h5> */}
+                                                {/* <p className="text-xl font-serif text-navy-900">{booking.bookingDetails.price}</p> */}
                                             </div>
 
                                             {booking.status === 'pending' ? (
@@ -202,4 +193,4 @@ const AdminDashboard = () => {
     );
 };
 
-export default AdminDashboard;
+export default AdminTrips;

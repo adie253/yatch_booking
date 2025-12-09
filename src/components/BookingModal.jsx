@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Calendar, Clock, User, Mail, Phone, CheckCircle } from 'lucide-react';
 
-const BookingModal = ({ isOpen, onClose, yacht, date, duration, price }) => {
+const BookingModal = ({ isOpen, onClose, yacht, date, duration, guests, price }) => {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -17,36 +17,15 @@ const BookingModal = ({ isOpen, onClose, yacht, date, duration, price }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        const subject = `Yacht Charter Request: ${yacht.name}`;
-        const body = `
-Name: ${formData.name}
-Email: ${formData.email}
-Phone: ${formData.phone}
-
---- Booking Details ---
-Date: ${date}
-Duration: ${duration} Hours
-Estimated Price: ${price ? price : 'To be confirmed'}
-
---- Yacht Details ---
-Yacht: ${yacht.name}
-Category: ${yacht.category}
-Location: ${yacht.location}
-Guests: ${yacht.capacity}
-Length: ${yacht.length} ft
-`.trim();
-
-        const mailtoLink = `mailto:bookings@luxeyachts.ae?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-
         // Save to localStorage
         const newBooking = {
             id: Date.now(),
             status: 'pending',
-            yachtDetails: {
-                name: yacht.name,
-                category: yacht.category,
-                location: yacht.location,
-                image: yacht.image
+            itemDetails: {
+                name: yacht.name || yacht.title,
+                category: yacht.category || 'Trip',
+                location: yacht.location || 'Dubai Harbour',
+                image: yacht.image || ''
             },
             userDetails: {
                 name: formData.name,
@@ -54,17 +33,18 @@ Length: ${yacht.length} ft
                 phone: formData.phone
             },
             bookingDetails: {
-                date: date,
-                duration: duration,
-                price: price
+                date: date || 'Not specified',
+                duration: duration || yacht.duration || 'Not specified',
+                guests: guests || 'Not specified',
+                price: price || 'To be confirmed'
             },
             timestamp: new Date().toISOString()
         };
 
-        const existingBookings = JSON.parse(localStorage.getItem('boat_bookings') || '[]');
-        localStorage.setItem('boat_bookings', JSON.stringify([...existingBookings, newBooking]));
+        const storageKey = yacht.storageKey || 'boat_bookings';
+        const existingBookings = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        localStorage.setItem(storageKey, JSON.stringify([...existingBookings, newBooking]));
 
-        window.location.href = mailtoLink;
         setIsSubmitted(true);
         // Optional: Auto-close after a few seconds
         setTimeout(() => {
@@ -137,20 +117,21 @@ Length: ${yacht.length} ft
                                 ) : (
                                     <>
                                         {/* Summary */}
-                                        <div className="bg-sand-100 rounded-xl p-4 mb-6 grid grid-cols-2 gap-4">
-                                            <div className="flex items-center gap-3">
-                                                <Calendar className="text-gold-400 w-5 h-5" />
-                                                <div>
-                                                    <p className="text-xs uppercase text-gray-500 font-bold">Date</p>
-                                                    <p className="text-navy-900 font-medium">{date || 'Not Selected'}</p>
-                                                </div>
+                                        <div className="bg-sand-100 rounded-xl p-4 mb-6 grid grid-cols-3 gap-2">
+                                            <div className="flex flex-col items-center text-center p-2 bg-white rounded-lg shadow-sm">
+                                                <Calendar className="text-gold-400 w-5 h-5 mb-1" />
+                                                <p className="text-[10px] uppercase text-gray-400 font-bold">Date</p>
+                                                <p className="text-navy-900 font-bold text-sm truncate w-full">{date || '-'}</p>
                                             </div>
-                                            <div className="flex items-center gap-3">
-                                                <Clock className="text-gold-400 w-5 h-5" />
-                                                <div>
-                                                    <p className="text-xs uppercase text-gray-500 font-bold">Duration</p>
-                                                    <p className="text-navy-900 font-medium">{duration} Hours</p>
-                                                </div>
+                                            <div className="flex flex-col items-center text-center p-2 bg-white rounded-lg shadow-sm">
+                                                <Clock className="text-gold-400 w-5 h-5 mb-1" />
+                                                <p className="text-[10px] uppercase text-gray-400 font-bold">Duration</p>
+                                                <p className="text-navy-900 font-bold text-sm truncate w-full">{duration || '-'}</p>
+                                            </div>
+                                            <div className="flex flex-col items-center text-center p-2 bg-white rounded-lg shadow-sm">
+                                                <User className="text-gold-400 w-5 h-5 mb-1" />
+                                                <p className="text-[10px] uppercase text-gray-400 font-bold">Guests</p>
+                                                <p className="text-navy-900 font-bold text-sm truncate w-full">{guests || '-'}</p>
                                             </div>
                                         </div>
 
