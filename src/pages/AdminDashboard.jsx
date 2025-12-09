@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Anchor, LogOut, Check, X, Clock, Calendar, DollarSign, User, Phone, Mail, MapPin } from 'lucide-react';
+import { Anchor, LogOut, Check, X, Clock, Calendar, DollarSign, User, Phone, Mail, MapPin, Download } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const AdminDashboard = () => {
@@ -38,6 +38,18 @@ const AdminDashboard = () => {
         ? bookings.filter(b => b.status === 'pending')
         : bookings.filter(b => b.status !== 'pending');
 
+    const handleDownload = () => {
+        const dataStr = JSON.stringify(bookings, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `yacht_bookings_${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     return (
         <div className="min-h-screen bg-sand-100">
             {/* Top Bar */}
@@ -51,6 +63,12 @@ const AdminDashboard = () => {
                         <Link to="/admin/trips" className="text-sm uppercase tracking-widest text-white hover:text-gold-400 transition-colors flex items-center gap-2">
                             <MapPin size={16} /> View Trip Bookings
                         </Link>
+                        <button
+                            onClick={handleDownload}
+                            className="text-sm uppercase tracking-widest text-white hover:text-gold-400 transition-colors flex items-center gap-2"
+                        >
+                            <Download size={16} /> Export JSON
+                        </button>
                         <button
                             onClick={handleLogout}
                             className="flex items-center gap-2 text-sm uppercase tracking-widest hover:text-gold-400 transition-colors"
